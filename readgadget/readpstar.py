@@ -2,12 +2,14 @@ from .modules.common import *
 import numpy as np
 import os
 
+
 class Group(object):
-    def __init__(self,npart,index):
+    def __init__(self, npart, index):
         self.index = index
         self.npart_total = npart
 
-def readpstar(catdir,snapnum,groupIndex,**kwargs):
+
+def readpstar(catdir, snapnum, groupIndex, **kwargs):
     """Read and return info from P-Star catalogues.
 
     Parameters
@@ -18,7 +20,7 @@ def readpstar(catdir,snapnum,groupIndex,**kwargs):
         snapnum you are interested in
     groupIndex : int
         which group to return info for? (-1 for all)
-    
+
     Notes
     -----
     returns a Group class
@@ -26,50 +28,50 @@ def readpstar(catdir,snapnum,groupIndex,**kwargs):
 
     GROUPS = []
 
-    fcat   = open('%s/catalogue_%03d' % (catdir,snapnum),'rb')
-    fprop  = open('%s/properties_%03d' % (catdir,snapnum),'rb')
-    fpos   = open('%s/pos_%03d' % (catdir,snapnum),'rb')
-    fptype = open('%s/type_%03d' % (catdir,snapnum),'rb')
-    findex = open('%s/index_%03d' % (catdir,snapnum),'rb')
-    
-    ngroups  = np.fromfile(fcat,dtype=np.uint32,count=1)[0]
-    nparttot = np.fromfile(fpos,dtype=np.uint32,count=1)[0]
-    fprop.seek(4,1)
-    fptype.seek(4,1)
-    findex.seek(4,1)
+    fcat = open("%s/catalogue_%03d" % (catdir, snapnum), "rb")
+    fprop = open("%s/properties_%03d" % (catdir, snapnum), "rb")
+    fpos = open("%s/pos_%03d" % (catdir, snapnum), "rb")
+    fptype = open("%s/type_%03d" % (catdir, snapnum), "rb")
+    findex = open("%s/index_%03d" % (catdir, snapnum), "rb")
 
-    for i in range(0,ngroups):
+    ngroups = np.fromfile(fcat, dtype=np.uint32, count=1)[0]
+    nparttot = np.fromfile(fpos, dtype=np.uint32, count=1)[0]
+    fprop.seek(4, 1)
+    fptype.seek(4, 1)
+    findex.seek(4, 1)
+
+    for i in range(0, ngroups):
         gpids = []
         spids = []
         stypes = []
-        pids  = []
+        pids = []
 
-        nparts = np.fromfile(fcat,dtype=np.uint32,count=1)[0]
-        offset = np.fromfile(fcat,dtype=np.uint32,count=1)[0]
-        for j in range(0,nparts):
-            ppos  = np.fromfile(fpos,dtype=np.float32,count=3)
-            ptype = np.fromfile(fptype,dtype=np.uint32,count=1)[0]
-            pid   = np.fromfile(findex,dtype=np.uint32,count=1)[0]
+        nparts = np.fromfile(fcat, dtype=np.uint32, count=1)[0]
+        offset = np.fromfile(fcat, dtype=np.uint32, count=1)[0]
+        for j in range(0, nparts):
+            ppos = np.fromfile(fpos, dtype=np.float32, count=3)
+            ptype = np.fromfile(fptype, dtype=np.uint32, count=1)[0]
+            pid = np.fromfile(findex, dtype=np.uint32, count=1)[0]
             if ptype == 0:
                 gpids.append(pid)
             elif ptype == 4:
                 spids.append(pid)
                 stypes.append(ptype)
-                
-        pmstars = np.fromfile(fprop,dtype=np.float32,count=1)[0]
-        mags    = np.fromfile(fprop,dtype=np.float32,count=4)
-        pcm     = np.fromfile(fprop,dtype=np.float32,count=3)
-        pmsfr   = np.fromfile(fprop,dtype=np.float32,count=1)[0]
-        pmgas   = np.fromfile(fprop,dtype=np.float32,count=1)[0]
-        pmmetals= np.fromfile(fprop,dtype=np.float32,count=1)[0]
-        pmgmetals=np.fromfile(fprop,dtype=np.float32,count=1)[0]
 
-        GROUPS.append(Group(nparts,i))
+        pmstars = np.fromfile(fprop, dtype=np.float32, count=1)[0]
+        mags = np.fromfile(fprop, dtype=np.float32, count=4)
+        pcm = np.fromfile(fprop, dtype=np.float32, count=3)
+        pmsfr = np.fromfile(fprop, dtype=np.float32, count=1)[0]
+        pmgas = np.fromfile(fprop, dtype=np.float32, count=1)[0]
+        pmmetals = np.fromfile(fprop, dtype=np.float32, count=1)[0]
+        pmgmetals = np.fromfile(fprop, dtype=np.float32, count=1)[0]
+
+        GROUPS.append(Group(nparts, i))
         GROUPS[i].mstar = pmstars
-        GROUPS[i].mgas  = pmgas
-        GROUPS[i].cm    = pcm
-        GROUPS[i].metals= pmmetals
-        GROUPS[i].gmetals=pmgmetals
+        GROUPS[i].mgas = pmgas
+        GROUPS[i].cm = pcm
+        GROUPS[i].metals = pmmetals
+        GROUPS[i].gmetals = pmgmetals
         GROUPS[i].gpids = gpids
         GROUPS[i].spids = spids
         GROUPS[i].stypes = stypes
@@ -81,15 +83,15 @@ def readpstar(catdir,snapnum,groupIndex,**kwargs):
     findex.close()
 
     if groupIndex == -1:
-        groupIndex = range(0,ngroups)
+        groupIndex = range(0, ngroups)
 
-    if isinstance(groupIndex,int):
+    if isinstance(groupIndex, int):
         grp = GROUPS[groupIndex]
         return grp
-        
-    elif isinstance(groupIndex,list):
+
+    elif isinstance(groupIndex, list):
         grps = []
-        for i in range(0,len(groupIndex)):
+        for i in range(0, len(groupIndex)):
             grp = GROUPS[groupIndex[i]]
             grps.append(grp)
 
