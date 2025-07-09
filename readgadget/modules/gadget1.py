@@ -1,9 +1,11 @@
 ## FOR GADGET TYPE 1 BINARY FILES ##
 
 import sys
+
 import numpy as np
+
 from .common import METALFACTOR
-from .names import headerTypes, GasProps, GasStarProps
+from .names import GasProps, GasStarProps, headerTypes
 
 
 def skip(f):
