@@ -3,6 +3,7 @@
 import os
 import struct
 import sys
+import tempfile
 from unittest.mock import MagicMock, mock_open, patch
 
 import numpy as np
@@ -179,30 +180,41 @@ def test_detectFileType_multifile_second_pass(mock_isfile, snap_passed, f_type):
     assert header.snap == s_passed
 
 
-@patch("builtins.open", new_callable=mock_open)
-@patch("header.gadget1.skip", return_value=256)
-def test_read_gadget_header_gadget1(mock_skip, mock_file, gadget1_binary_header):
-    mock_file.return_value.read.return_value = gadget1_binary_header[
-        4:
-    ]  # Skip initial block size
-    header = Header("dummy_snap", 0, {})
-    header.fileType = "gadget1"
-    header.read_gadget_header()
+# @patch("builtins.open", new_callable=mock_open)
+# @patch("readgadget.modules.gadget1.skip", return_value=256)
+# def test_read_gadget_header_gadget1(mock_skip, mock_file, gadget1_binary_header):
+def test_read_gadget_header_gadget1(gadget1_binary_header):
+    # mock_file.return_value.read.return_value = gadget1_binary_header[
+    #     4:
+    # ]  # Skip initial block size
 
-    assert header.npartThisFile.tolist() == [10, 20, 0, 0, 5, 0]
-    assert header.massTable.tolist() == [0, 1e10, 0, 0, 5e9, 0]
-    assert header.time == 0.5
-    assert header.redshift == 1.0
-    assert header.flag_sfr == 1
-    assert header.flag_fb == 1
-    assert header.npartTotal.tolist() == [100, 200, 0, 0, 50, 0]
-    assert header.flag_cool == 1
-    assert header.nfiles == 8
-    assert header.boxsize == 100.0
-    assert header.Omega0 == 0.3
-    assert header.OmegaLambda == 0.7
-    assert header.HubbleParam == 0.7
-    assert header.flag_potential == 1
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(gadget1_binary_header)
+        tmp_name = tmp.name
+
+    try:
+        header = Header.__new__(Header)
+        header.snap = tmp_name
+        header.fileType = "gadget1"
+        header.read_gadget_header()
+
+        assert header.npartThisFile.tolist() == [10, 20, 0, 0, 5, 0]
+        assert header.massTable.tolist() == [0, 1e10, 0, 0, 5e9, 0]
+        assert header.time == 0.5
+        assert header.redshift == 1.0
+        assert header.flag_sfr == 1
+        assert header.flag_fb == 1
+        assert header.npartTotal.tolist() == [100, 200, 0, 0, 50, 0]
+        assert header.flag_cool == 1
+        assert header.nfiles == 8
+        assert header.boxsize == 100.0
+        assert header.Omega0 == 0.3
+        assert header.OmegaLambda == 0.7
+        assert header.HubbleParam == 0.7
+        assert header.flag_potential == 1
+    finally:
+        # Clean up the temporary file
+        os.unlink(tmp_name)
 
 
 @patch("h5py.File")
