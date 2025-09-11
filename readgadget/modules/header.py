@@ -1,8 +1,11 @@
+import os
+import struct
+import sys
+
 import numpy as np
-import os, sys
+
 from . import common as c
 from . import gadget_blockordering as gbo
-import struct
 
 
 class Header(object):
