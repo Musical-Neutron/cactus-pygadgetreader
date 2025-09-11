@@ -324,6 +324,3 @@ class Header(object):
         self.flag_delaytime = 1
 
         return
-        self.flag_delaytime = 1
-
-        return
