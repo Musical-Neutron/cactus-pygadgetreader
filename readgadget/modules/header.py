@@ -1,8 +1,11 @@
+import os
+import struct
+import sys
+
 import numpy as np
-import os, sys
+
 from . import common as c
 from . import gadget_blockordering as gbo
-import struct
 
 
 class Header(object):
@@ -318,6 +321,9 @@ class Header(object):
         self.flag_potential = 1
         self.flag_fH2 = 0
         self.flag_tmax = 1
+        self.flag_delaytime = 1
+
+        return
         self.flag_delaytime = 1
 
         return
